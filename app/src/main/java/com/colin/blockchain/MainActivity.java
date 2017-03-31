@@ -62,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            //检查消息队列并移除未发送的消息，这主要是避免在复杂环境下消息出现重复等问题。
             if (handler.hasMessages(MSG_UPDATE_IMAGE)) {
                 handler.removeMessages(MSG_UPDATE_IMAGE);
             }
@@ -71,8 +70,7 @@ public class MainActivity extends AppCompatActivity {
                     getDataFormServer();
                     handler.sendEmptyMessageDelayed(MSG_UPDATE_IMAGE, MSG_DELAY);
                     break;
-                case MSG_KEEP_SILENT:
-                    //只要不发送消息就暂停了
+                case MSG_KEEP_SILENT://只要不发送消息就暂停了
                     break;
                 case MSG_BREAK_SILENT:
                     handler.sendEmptyMessageDelayed(MSG_UPDATE_IMAGE, MSG_DELAY);
