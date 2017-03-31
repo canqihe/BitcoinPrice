@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
     RelativeLayout mRelativeLayout;
     @BindView(R.id.coin_name)
     TextView coinName;
-    int currentCoin = 0;
+    int currentCoin = 2;
 
     String coinNameTx = "Ehtereum Classic";
     String coinType = "etc_cny";
@@ -101,7 +101,6 @@ public class MainActivity extends AppCompatActivity {
         mRelativeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mRelativeLayout.setBackground(getResources().getDrawable(R.drawable.color_bg));
                 if (currentCoin == 1) {
                     coinNameTx = "Ethereum Classic";
                     coinType = "etc_cny";
@@ -145,11 +144,13 @@ public class MainActivity extends AppCompatActivity {
                         getSupportActionBar().setTitle(TimeUtil.stampToDate(resultBean.getDate()));
                         price.setText(resultBean.getTicker().getLast());
                         if (Float.parseFloat(resultBean.getTicker().getLast()) < Float.parseFloat(PreUtils.getString(MainActivity.this, "priceA", "0")))
-//                            price.setTextColor(Color.parseColor("#2baf2b"));
                             mRelativeLayout.setBackground(getResources().getDrawable(R.drawable.green_bg));
                         else
-//                            price.setTextColor(Color.parseColor("#e84e40"));
                             mRelativeLayout.setBackground(getResources().getDrawable(R.drawable.red_bg));
+                        if (resultBean.getTicker().getLast().length() > 5)
+                            price.setTextSize(99.0f);
+                        else
+                            price.setTextSize(110.0f);
                         high.setText(resultBean.getTicker().getHigh());
                         low.setText(resultBean.getTicker().getLow());
                         buy.setText(resultBean.getTicker().getBuy());
