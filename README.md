@@ -5,4 +5,5 @@
 
 
 #Preview
-<img src="/art/preview.png?raw=true" width=360 height=640 alt="Quick Demo">
+
+<img src="/art/preview.png?raw=true" width=360 height=640 alt="Price Demo">
