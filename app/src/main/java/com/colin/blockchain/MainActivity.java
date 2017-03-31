@@ -1,8 +1,10 @@
 package com.colin.blockchain;
 
+import android.app.Service;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -27,8 +29,6 @@ public class MainActivity extends AppCompatActivity {
 
     //请求更新显示的View
     protected static final int MSG_UPDATE_IMAGE = 1;
-    //请求暂停轮播
-    protected static final int MSG_KEEP_SILENT = 2;
     //请求恢复轮播
     protected static final int MSG_BREAK_SILENT = 3;
     //轮播间隔时间
@@ -52,11 +52,14 @@ public class MainActivity extends AppCompatActivity {
     RelativeLayout mRelativeLayout;
     @BindView(R.id.coin_name)
     TextView coinName;
+    @BindView(R.id.sell)
+    TextView sell;
     int currentCoin = 2;
 
-    String coinNameTx = "Ehtereum Classic";
+    String coinNameTx = "Ehtereum Classic\n以太经典";
     String coinType = "etc_cny";
     int drawable;
+    PowerManager.WakeLock wakeLock;
 
     Handler handler = new Handler() {
         @Override
@@ -69,8 +72,6 @@ public class MainActivity extends AppCompatActivity {
                 case MSG_UPDATE_IMAGE:
                     getDataFormServer();
                     handler.sendEmptyMessageDelayed(MSG_UPDATE_IMAGE, MSG_DELAY);
-                    break;
-                case MSG_KEEP_SILENT://只要不发送消息就暂停了
                     break;
                 case MSG_BREAK_SILENT:
                     handler.sendEmptyMessageDelayed(MSG_UPDATE_IMAGE, MSG_DELAY);
@@ -94,6 +95,12 @@ public class MainActivity extends AppCompatActivity {
         NotifyUtil.init(getApplicationContext());//初始化通知
         initData();
 
+
+        PowerManager powerManager = (PowerManager) this.getSystemService(Service.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "My Lock");
+        //是否需计算锁的数量
+        wakeLock.setReferenceCounted(false);
+
     }
 
     public void initData() {
@@ -103,19 +110,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (currentCoin == 1) {
-                    coinNameTx = "Ethereum Classic";
+                    coinNameTx = "Ethereum Classic\n以太经典";
                     coinType = "etc_cny";
                 }
                 if (currentCoin == 2) {
-                    coinNameTx = "Ethereum";
+                    coinNameTx = "Ethereum\n以太坊";
                     coinType = "eth_cny";
                 }
                 if (currentCoin == 3) {
-                    coinNameTx = "Bitcoin";
+                    coinNameTx = "Bitcoin\n比特币";
                     coinType = "btc_cny";
                 }
                 if (currentCoin == 4) {
-                    coinNameTx = "Litcoin";
+                    coinNameTx = "Litcoin\n莱特币";
                     coinType = "ltc_cny";
                     currentCoin = 0;
                 }
@@ -147,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
                         if (Float.parseFloat(resultBean.getTicker().getLast()) < Float.parseFloat(PreUtils.getString(MainActivity.this, "priceA", "0"))) {
                             mRelativeLayout.setBackground(getResources().getDrawable(R.drawable.green_bg));
                             drawable = R.drawable.ic_trending_down_black_24dp;
-                        } else {
+                        } else if (Float.parseFloat(resultBean.getTicker().getLast()) > Float.parseFloat(PreUtils.getString(MainActivity.this, "priceA", "0"))) {
                             mRelativeLayout.setBackground(getResources().getDrawable(R.drawable.red_bg));
                             drawable = R.drawable.ic_trending_up_black_24dp;
                         }
@@ -158,11 +165,11 @@ public class MainActivity extends AppCompatActivity {
                         high.setText(resultBean.getTicker().getHigh());
                         low.setText(resultBean.getTicker().getLow());
                         buy.setText(resultBean.getTicker().getBuy());
+                        sell.setText(resultBean.getTicker().getSell());
                         exchange.setText(TimeUtil.FormetSize(Float.parseFloat(resultBean.getTicker().getVol())));
 
                         //Notification
                         NotifyUtil.buildBigText(104, drawable, coinNameTx, resultBean.getTicker().getLast() + "")
-                                .setForgroundService()
                                 .show();
 
                         PreUtils.setString(MainActivity.this, "priceA", resultBean.getTicker().getLast());
@@ -171,4 +178,15 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        wakeLock.acquire();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        wakeLock.release();
+    }
 }
