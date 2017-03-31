@@ -15,6 +15,7 @@ import com.colin.blockchain.bean.ResultBean;
 import com.colin.blockchain.utils.PreUtils;
 import com.colin.blockchain.utils.TimeUtil;
 import com.google.gson.Gson;
+import com.hss01248.notifyutil.NotifyUtil;
 import com.squareup.okhttp.Request;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.StringCallback;
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
     String coinNameTx = "Ehtereum Classic";
     String coinType = "etc_cny";
+    int drawable;
 
     Handler handler = new Handler() {
         @Override
@@ -91,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         toolbar.setNavigationIcon(R.drawable.ic_query_builder_black_24dp);
+        NotifyUtil.init(getApplicationContext());//初始化通知
         initData();
 
     }
@@ -143,10 +146,13 @@ public class MainActivity extends AppCompatActivity {
                         ResultBean resultBean = new Gson().fromJson(response, ResultBean.class);
                         getSupportActionBar().setTitle(TimeUtil.stampToDate(resultBean.getDate()));
                         price.setText(resultBean.getTicker().getLast());
-                        if (Float.parseFloat(resultBean.getTicker().getLast()) < Float.parseFloat(PreUtils.getString(MainActivity.this, "priceA", "0")))
+                        if (Float.parseFloat(resultBean.getTicker().getLast()) < Float.parseFloat(PreUtils.getString(MainActivity.this, "priceA", "0"))) {
                             mRelativeLayout.setBackground(getResources().getDrawable(R.drawable.green_bg));
-                        else
+                            drawable = R.drawable.ic_trending_down_black_24dp;
+                        } else {
                             mRelativeLayout.setBackground(getResources().getDrawable(R.drawable.red_bg));
+                            drawable = R.drawable.ic_trending_up_black_24dp;
+                        }
                         if (resultBean.getTicker().getLast().length() > 5)
                             price.setTextSize(99.0f);
                         else
@@ -155,6 +161,12 @@ public class MainActivity extends AppCompatActivity {
                         low.setText(resultBean.getTicker().getLow());
                         buy.setText(resultBean.getTicker().getBuy());
                         exchange.setText(TimeUtil.FormetSize(Float.parseFloat(resultBean.getTicker().getVol())));
+
+                        //Notification
+                        NotifyUtil.buildBigText(104, drawable, coinNameTx, resultBean.getTicker().getLast() + "")
+                                .setForgroundService()
+                                .show();
+
                         PreUtils.setString(MainActivity.this, "priceA", resultBean.getTicker().getLast());
                         handler.sendEmptyMessageDelayed(MSG_UPDATE_IMAGE, MSG_DELAY);
                     }

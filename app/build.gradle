@@ -36,4 +36,5 @@ dependencies {
     apt 'com.jakewharton:butterknife-compiler:8.0.1'
     compile 'com.jakewharton:butterknife:8.1.0'
     compile 'com.android.support:cardview-v7:+'
+    compile 'com.github.hss01248:NotifyUtil:1.0.0'
 }
